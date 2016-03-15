@@ -39,7 +39,6 @@ public class Mqtt {
 		loadProperties();
 		connect();
 		this.ids = ids;
-		subscribe(ids);
 	}
 	
 	/**
@@ -49,7 +48,7 @@ public class Mqtt {
 	private void loadProperties() {
 		prop = new Properties();
 		try {
-			InputStream is = new FileInputStream("broker.properties");
+			InputStream is = new FileInputStream("broker.properties.txt");
 			prop.load(is);
 			ADDRESS = prop.getProperty("so_address");
 			USERNAME = prop.getProperty("so_username");
@@ -65,7 +64,7 @@ public class Mqtt {
 	 * Connects to the ServIoTicy MQTT endpoint
 	 * 
 	 */
-	private void connect() {
+	public void connect() {
 		connOpts = new MqttConnectOptions();
 		
 		/**
@@ -90,15 +89,18 @@ public class Mqtt {
 	
 	
 	public void subscribe(Set<String> ids) {
-		for (String id : ids) {
-			topic = id + "/actions";
-			try {
-				client.subscribe(topic);
-				System.out.println("Subscribed to actuator " + uts.extractIdFromTopic(topic));
-			} catch (MqttException e) {
-				e.printStackTrace();
-			}
+		for (String id : ids) subscribe(id);
+	}
+	
+	public String subscribe(String id) {
+		topic = id + "/actions";
+		try {
+			client.subscribe(topic);
+			return "Subscribed to actuator " + uts.extractIdFromTopic(topic);
+		} catch (MqttException e) {
+			e.printStackTrace();
 		}
+		return "Unable to subscribe to actuator " + id;
 	}
 	
 	
@@ -117,8 +119,16 @@ public class Mqtt {
 	public void disconnect() {
 		try {
 			client.disconnect();
+			client.close();
 		} catch (MqttException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void reconnect() {
+		disconnect();
+		loadProperties();
+		connect();
+		System.out.println("Reconnected to Broker");
 	}
 }

@@ -8,11 +8,13 @@ public class Actuator {
 	private String state;
 	private int stateValue;
 	private String lastAction;
+	private boolean subscribed;
 	
 	public Actuator(String soid, String model, String location) {
 		this.soid = soid;
 		this.model = model;
 		this.location = location;
+		subscribed = false;
 	}
 	
 
@@ -65,4 +67,16 @@ public class Actuator {
 	public void setLastAction(String lastAction) {
 		this.lastAction = lastAction;
 	}
+
+
+	public boolean isSubscribed() {
+		return subscribed;
+	}
+
+
+	public void setSubscribed(boolean subscribed) {
+		this.subscribed = subscribed;
+	}
+	
+	
 }

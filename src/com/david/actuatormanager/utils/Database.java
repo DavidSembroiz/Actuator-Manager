@@ -50,7 +50,7 @@ public class Database {
 	private void loadProperties() {
 		prop = new Properties();
 		try {
-			InputStream is = new FileInputStream("database.properties");
+			InputStream is = new FileInputStream("database.properties.txt");
 			prop.load(is);
 			DB_USERNAME = prop.getProperty("db_username");
 			DB_PASSWORD = prop.getProperty("db_password");
@@ -162,6 +162,13 @@ public class Database {
 			closeConnection(c);
 		}
 		return ret;
+	}
+
+	public void reconnect() {
+		poolSource.close();
+		initComponents();
+		
+		System.out.println("Reconnected to Database");
 	}
 	
 	

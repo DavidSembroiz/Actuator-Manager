@@ -21,6 +21,7 @@ public class MqttCb implements MqttCallback {
 	@Override
 	public void connectionLost(Throwable arg0) {
 		System.out.println(arg0.getMessage());
+		arg0.printStackTrace();
 		System.out.println("Connection lost!");
 		
 	}
