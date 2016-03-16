@@ -16,7 +16,7 @@ public class Controller {
 	private Manager manager;
 
 	public void reconnectToDatabase() {
-		manager.reconnectToDatabase();
+		gui.appendOutputText(manager.reconnectToDatabase());
 	}
 	
 	public void setManager(Manager m) {
@@ -28,7 +28,8 @@ public class Controller {
 	}
 
 	public void reconnectToBroker() {
-		manager.reconnectToBroker();
+		manager.cleanSubscriptions();
+		gui.appendOutputText(manager.reconnectToBroker());
 	}
 
 	public ArrayList<Room> getRoomTree() {

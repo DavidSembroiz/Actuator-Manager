@@ -51,6 +51,8 @@ public class MainGUI {
 				display.sleep();
 			}
 		}
+		shell.dispose();
+		System.exit(0);
 	}
 
 	
@@ -73,8 +75,8 @@ public class MainGUI {
 				try {
 					if (System.getProperty("os.name").toLowerCase().contains("windows")) {
 						  String cmd = "rundll32 url.dll,FileProtocolHandler " + f.getCanonicalPath();
-						  Process p = Runtime.getRuntime().exec(cmd);
-						  controller.reconnectToDatabase();
+						  Runtime.getRuntime().exec(cmd);
+						  //controller.reconnectToDatabase();
 						} 
 						else {
 						  java.awt.Desktop.getDesktop().edit(f);
@@ -95,9 +97,8 @@ public class MainGUI {
 				try {
 					if (System.getProperty("os.name").toLowerCase().contains("windows")) {
 						  String cmd = "rundll32 url.dll,FileProtocolHandler " + f.getCanonicalPath();
-						  Process p = Runtime.getRuntime().exec(cmd);
-						  while (p.isAlive());
-						  controller.reconnectToBroker();
+						  Runtime.getRuntime().exec(cmd);
+						  //controller.reconnectToBroker();
 						} 
 						else {
 						  java.awt.Desktop.getDesktop().edit(f);
@@ -149,11 +150,31 @@ public class MainGUI {
 				subscribeToSelectedActuators();
 			}
 		});
-		btnSubscribe.setBounds(356, 148, 75, 25);
+		btnSubscribe.setBounds(350, 83, 140, 25);
 		btnSubscribe.setText("Subscribe");
 		
 		text = new Text(shell, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		text.setBounds(20, 198, 722, 220);
+		
+		Button btnReconnectToBroker = new Button(shell, SWT.NONE);
+		btnReconnectToBroker.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				controller.reconnectToBroker();
+			}
+		});
+		btnReconnectToBroker.setBounds(350, 53, 140, 25);
+		btnReconnectToBroker.setText("Reconnect to Broker");
+		
+		Button btnReconnectToDatabase = new Button(shell, SWT.NONE);
+		btnReconnectToDatabase.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				controller.reconnectToDatabase();
+			}
+		});
+		btnReconnectToDatabase.setText("Reconnect to Database");
+		btnReconnectToDatabase.setBounds(350, 22, 140, 25);
 		
 	}
 
@@ -198,5 +219,4 @@ public class MainGUI {
 		createContents();
 		open();
 	}
-
 }

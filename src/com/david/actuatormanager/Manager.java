@@ -46,7 +46,7 @@ public class Manager {
 		a.setLastAction(action);
 		a.setState(status);
 		
-		controller.appendOutputText("SOID " + soid + ". Action " + action + " done with parameter " + status);
+		controller.appendOutputText("SOID " + soid + ": Action " + action + " done with parameter " + status);
 		
 	}
 	
@@ -115,18 +115,27 @@ public class Manager {
 		for (String a : actsList) {
 			for (Actuator ac : acts) {
 				if (a.equals(ac.getModel()) && !ac.isSubscribed()) {
-					controller.appendOutputText(mqtt.subscribe(ac.getSoid()));
+					controller.appendOutputText(mqtt.subscribe(ac.getSoid(), ac.getModel(), ac.getLocation()));
 					ac.setSubscribed(true);
 				}
 			}
 		}
 	}
 
-	public void reconnectToDatabase() {
-		db.reconnect();
+	public String reconnectToDatabase() {
+		return db.reconnect();
 	}
 
-	public void reconnectToBroker() {
-		mqtt.reconnect();
+	public String reconnectToBroker() {
+		return mqtt.reconnect();
+	}
+
+	public void cleanSubscriptions() {
+		Iterator it = actuators.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry pair = (Map.Entry) it.next();
+			Actuator a = (Actuator) pair.getValue();
+			a.setSubscribed(false);
+		}
 	}
 }

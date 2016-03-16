@@ -164,11 +164,11 @@ public class Database {
 		return ret;
 	}
 
-	public void reconnect() {
+	public String reconnect() {
 		poolSource.close();
 		initComponents();
 		
-		System.out.println("Reconnected to Database");
+		return "Loaded new Database settings";
 	}
 	
 	

@@ -64,7 +64,7 @@ public class Mqtt {
 	 * Connects to the ServIoTicy MQTT endpoint
 	 * 
 	 */
-	public void connect() {
+	public String connect() {
 		connOpts = new MqttConnectOptions();
 		
 		/**
@@ -80,27 +80,27 @@ public class Mqtt {
 			callback = new MqttCb(manager);
 			client.setCallback(callback);
 			client.connect(connOpts);
-			if (client.isConnected()) System.out.println("Connected to MQTT Broker");
+			if (client.isConnected()) return "Connected to MQTT Broker";
 		} catch (MqttException e) {
-			e.printStackTrace();
-			System.exit(-1);
+			if (client.isConnected()) return "Already connected";
 		}
+		return "Unable to connect to MQTT Broker";
 	}
 	
 	
-	public void subscribe(Set<String> ids) {
+	/*public void subscribe(Set<String> ids) {
 		for (String id : ids) subscribe(id);
-	}
+	}*/
 	
-	public String subscribe(String id) {
+	public String subscribe(String id, String model, String location) {
 		topic = id + "/actions";
 		try {
 			client.subscribe(topic);
-			return "Subscribed to actuator " + uts.extractIdFromTopic(topic);
+			return "Subscribed to actuator " + model + " from " + location;
 		} catch (MqttException e) {
 			e.printStackTrace();
 		}
-		return "Unable to subscribe to actuator " + id;
+		return "Unable to subscribe to actuator " + model + " from " + location;
 	}
 	
 	
@@ -125,10 +125,10 @@ public class Mqtt {
 		}
 	}
 
-	public void reconnect() {
+	public String reconnect() {
 		disconnect();
+		while (client.isConnected());
 		loadProperties();
-		connect();
-		System.out.println("Reconnected to Broker");
+		return connect();
 	}
 }
