@@ -15,8 +15,11 @@ import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
@@ -44,7 +47,7 @@ public class MainGUI {
 	 * Open the window.
 	 */
 	public void open() {
-	    display = Display.getDefault();
+	    
 		shell.open();
 		shell.layout();
 		while (!shell.isDisposed()) {
@@ -77,7 +80,6 @@ public class MainGUI {
 					if (System.getProperty("os.name").toLowerCase().contains("windows")) {
 						  String cmd = "rundll32 url.dll,FileProtocolHandler " + f.getCanonicalPath();
 						  Runtime.getRuntime().exec(cmd);
-						  //controller.reconnectToDatabase();
 						} 
 						else {
 						  java.awt.Desktop.getDesktop().edit(f);
@@ -116,16 +118,24 @@ public class MainGUI {
 	 * @wbp.parser.entryPoint
 	 */
 	public void createContents() {
+		display = Display.getDefault();
 		shell = new Shell();
 		shell.setSize(589, 523);
 		shell.setText("Actuator Manager");
+		Monitor primary = display.getPrimaryMonitor();
+	    Rectangle bounds = primary.getBounds();
+	    Rectangle rect = shell.getBounds();
+	    
+	    int x = bounds.x + (bounds.width - rect.width) / 2;
+	    int y = bounds.y + (bounds.height - rect.height) / 2;
+	    
+	    shell.setLocation(x, y);
 		
 		createMenu();
 		createTree();
-		createSubscriptionButton();
+		createSubscriptionButtons();
 		createLogArea();
 		createReconnectButtons();
-		updateRoomTree(controller.getRoomTree());
 	}
 	
 	private void checkItems(TreeItem item, boolean checked) {
@@ -137,7 +147,7 @@ public class MainGUI {
 	    }
 	}
 	
-	private void createSubscriptionButton() {
+	private void createSubscriptionButtons() {
 		Button btnSubscribe = new Button(shell, SWT.NONE);
 		btnSubscribe.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -174,7 +184,16 @@ public class MainGUI {
 		btnReconnectToDatabase.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				controller.reconnectToDatabase();
+				
+				MessageBox dialog = new MessageBox(shell, SWT.ICON_QUESTION | SWT.OK| SWT.CANCEL);
+				dialog.setText("Reconnect to database");
+				dialog.setMessage("All subscriptions will be deleted. Continue?");
+				
+				int returnCode = dialog.open();
+				if (returnCode == SWT.OK) {
+					controller.reconnectToDatabase();
+					updateRoomTree(controller.getRoomTree());
+				}
 			}
 		});
 		btnReconnectToDatabase.setText("Reconnect to Database");
@@ -216,6 +235,7 @@ public class MainGUI {
 	}
 
 	public void updateRoomTree(ArrayList<Room> rooms) {
+		tree.removeAll();
 		boolean first = true;
 		for (Room r : rooms) {
 			TreeItem roomItem = new TreeItem(tree, SWT.NONE);
@@ -274,6 +294,8 @@ public class MainGUI {
 
 	public void initialise() {
 		createContents();
+		controller.initialiseManager();
+		updateRoomTree(controller.getRoomTree());
 		open();
 	}
 

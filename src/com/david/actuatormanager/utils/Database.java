@@ -140,7 +140,7 @@ public class Database {
 	}
 
 
-	public HashMap<String, Actuator> queryActuators(int n) {
+	public HashMap<String, Actuator> queryActuators(int n) throws SQLException {
 		HashMap<String, Actuator> ret = new HashMap<String, Actuator>();
 		Connection c = null;
 		try {
@@ -155,9 +155,6 @@ public class Database {
 				Actuator a = new Actuator(id, model, location);
 				ret.put(id, a);
 			}
-			
-		} catch (SQLException e) {
-			e.printStackTrace();
 		} finally {
 			closeConnection(c);
 		}

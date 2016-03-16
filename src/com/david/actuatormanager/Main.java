@@ -9,9 +9,10 @@ public class Main {
 		Controller c = new Controller();
 		MainGUI app = new MainGUI(c);
 		Manager m = new Manager(c);
-		c.setGUI(app);
+		
 		c.setManager(m);
-
+		c.setGUI(app);
+		
 		app.initialise();
 	}
 }

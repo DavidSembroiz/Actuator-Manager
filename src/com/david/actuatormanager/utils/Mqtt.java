@@ -33,12 +33,11 @@ public class Mqtt {
 	private Properties prop;
 	private Manager manager;
 
-	public Mqtt(Manager m, Set<String> ids) {
+	public Mqtt(Manager m) {
 		uts = Utils.getInstance();
 		this.manager = m;
 		loadProperties();
 		connect();
-		this.ids = ids;
 	}
 	
 	/**

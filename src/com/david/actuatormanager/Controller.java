@@ -16,7 +16,8 @@ public class Controller {
 	private Manager manager;
 
 	public void reconnectToDatabase() {
-		gui.appendOutputText(manager.reconnectToDatabase());
+		
+		manager.reconnectToDatabase();
 	}
 	
 	public void setManager(Manager m) {
@@ -51,6 +52,10 @@ public class Controller {
 
 	public void updateView(Actuator a) {
 		gui.updateView(a);
+	}
+
+	public void initialiseManager() {
+		manager.initComponents();
 	}
 
 }

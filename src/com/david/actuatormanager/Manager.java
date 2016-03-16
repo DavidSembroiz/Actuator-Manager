@@ -1,6 +1,7 @@
 package com.david.actuatormanager;
 
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,10 +30,16 @@ public class Manager {
 		db = Database.getInstance();
 		uts = Utils.getInstance();
 		actuators = new HashMap<String, Actuator>();
-		actuators = db.queryActuators(QUERY_ALL);
-		
-		mqtt = new Mqtt(this, actuators.keySet());
-		
+	}
+	
+	
+	public void initComponents() {
+		mqtt = new Mqtt(this);
+		try {
+			actuators = db.queryActuators(QUERY_ALL);
+		} catch (SQLException e) {
+			controller.appendOutputText("Unable to connect to database, check config");
+		}
 	}
 
 	public void manageMessage(String topic, String mess) {
@@ -145,9 +152,26 @@ public class Manager {
 		}
 	}
 
-	public String reconnectToDatabase() {
-		return db.reconnect();
+	public void reconnectToDatabase() {
+		controller.appendOutputText(db.reconnect());
+		try {
+			deleteSubscriptions();
+			actuators = db.queryActuators(QUERY_ALL);
+		} catch (SQLException e) {
+			controller.appendOutputText("Unable to query database");
+		}
+		
 	}
+
+	private void deleteSubscriptions() {
+		Iterator it = actuators.entrySet().iterator();
+		while(it.hasNext()) {
+			Map.Entry pair = (Map.Entry) it.next();
+			Actuator a = (Actuator) pair.getValue();
+			if (a.isSubscribed()) mqtt.unsubscribe(a.getSoid(), a.getModel(), a.getLocation());
+		}
+	}
+
 
 	public String reconnectToBroker() {
 		return mqtt.reconnect();
