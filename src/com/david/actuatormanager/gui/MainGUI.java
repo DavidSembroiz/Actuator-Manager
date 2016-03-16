@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 
 import com.david.actuatormanager.Actuator;
@@ -116,11 +117,14 @@ public class MainGUI {
 	 */
 	public void createContents() {
 		shell = new Shell();
-		shell.setSize(795, 523);
+		shell.setSize(589, 523);
 		shell.setText("Actuator Manager");
 		
 		createMenu();
 		createTree();
+		createSubscriptionButton();
+		createLogArea();
+		createReconnectButtons();
 		updateRoomTree(controller.getRoomTree());
 	}
 	
@@ -133,16 +137,7 @@ public class MainGUI {
 	    }
 	}
 	
-	private void createTree() {
-		tree = new Tree(shell, SWT.BORDER | SWT.CHECK);
-		tree.addListener(SWT.Selection, event -> {
-		    if (event.detail == SWT.CHECK) {
-		        TreeItem item = (TreeItem) event.item;
-		        checkItems(item, item.getChecked());
-		    }
-		});
-		tree.setBounds(20, 22, 311, 151);
-		
+	private void createSubscriptionButton() {
 		Button btnSubscribe = new Button(shell, SWT.NONE);
 		btnSubscribe.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -150,12 +145,21 @@ public class MainGUI {
 				subscribeToSelectedActuators();
 			}
 		});
-		btnSubscribe.setBounds(350, 83, 140, 25);
+		btnSubscribe.setBounds(420, 85, 140, 25);
 		btnSubscribe.setText("Subscribe");
 		
-		text = new Text(shell, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-		text.setBounds(20, 198, 722, 220);
-		
+		Button btnUnsubscribe = new Button(shell, SWT.NONE);
+		btnUnsubscribe.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				unsubscribeFromSelectedActuators();
+			}
+		});
+		btnUnsubscribe.setText("Unsubscribe");
+		btnUnsubscribe.setBounds(420, 116, 140, 25);
+	}
+	
+	private void createReconnectButtons() {
 		Button btnReconnectToBroker = new Button(shell, SWT.NONE);
 		btnReconnectToBroker.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -163,7 +167,7 @@ public class MainGUI {
 				controller.reconnectToBroker();
 			}
 		});
-		btnReconnectToBroker.setBounds(350, 53, 140, 25);
+		btnReconnectToBroker.setBounds(420, 53, 140, 25);
 		btnReconnectToBroker.setText("Reconnect to Broker");
 		
 		Button btnReconnectToDatabase = new Button(shell, SWT.NONE);
@@ -174,19 +178,72 @@ public class MainGUI {
 			}
 		});
 		btnReconnectToDatabase.setText("Reconnect to Database");
-		btnReconnectToDatabase.setBounds(350, 22, 140, 25);
+		btnReconnectToDatabase.setBounds(420, 22, 140, 25);
 		
+	}
+	
+	private void createLogArea() {
+		text = new Text(shell, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+		text.setBounds(20, 284, 540, 171);
+	}
+	
+	
+	private void createTree() {
+		tree = new Tree(shell, SWT.BORDER | SWT.CHECK);
+		tree.setHeaderVisible(true);
+		tree.addListener(SWT.Selection, event -> {
+		    if (event.detail == SWT.CHECK) {
+		        TreeItem item = (TreeItem) event.item;
+		        checkItems(item, item.getChecked());
+		    }
+		});
+		TreeColumn roomCol = new TreeColumn(tree, SWT.NONE);
+		roomCol.setText("Room");
+		roomCol.setWidth(180);
+		roomCol.setAlignment(SWT.LEFT);
+		
+		TreeColumn lastActionCol = new TreeColumn(tree, SWT.NONE);
+		lastActionCol.setText("Last Action");
+		lastActionCol.setWidth(100);
+		lastActionCol.setAlignment(SWT.LEFT);
+		
+		TreeColumn parameterCol = new TreeColumn(tree, SWT.NONE);
+		parameterCol.setText("State");
+		parameterCol.setWidth(100);
+		parameterCol.setAlignment(SWT.LEFT);
+		
+		tree.setBounds(20, 22, 384, 244);	
 	}
 
 	public void updateRoomTree(ArrayList<Room> rooms) {
+		boolean first = true;
 		for (Room r : rooms) {
 			TreeItem roomItem = new TreeItem(tree, SWT.NONE);
 			roomItem.setText(r.getLocation());
 			for (Actuator a : r.getActuators()) {
 				TreeItem actuatorItem = new TreeItem(roomItem, SWT.CHECK);
-				actuatorItem.setText(a.getModel());
+				actuatorItem.setText(new String[] {a.getModel(), a.getLastAction(), a.getState()});
+			}
+			if (first) {
+				roomItem.setExpanded(true);
+				first = false;
 			}
 		}
+	}
+	
+	private void unsubscribeFromSelectedActuators() {
+		HashMap<String, Set<String>> acts = new HashMap<String, Set<String>>();
+		for (TreeItem rloc : tree.getItems()) {
+			Set<String> act = new HashSet<String>();
+			for (TreeItem ract : rloc.getItems()) {
+				if (ract.getChecked()) {
+					act.add(ract.getText());
+				}
+			}
+			if (act.size() > 0) acts.put(rloc.getText(), act);
+		}
+		
+		controller.unsubscribe(acts);
 	}
 	
 	private void subscribeToSelectedActuators() {
@@ -218,5 +275,33 @@ public class MainGUI {
 	public void initialise() {
 		createContents();
 		open();
+	}
+
+
+	public void updateView(Actuator a) {
+		display.syncExec(
+			    new Runnable() {
+			       public void run() {
+			    	   TreeItem actItem = findActuatorItem(a.getLocation(), a.getModel());
+			    	   if (actItem != null) {
+			    		   actItem.setText(1, a.getLastAction());
+			    		   actItem.setText(2, a.getState());
+			    	   }
+			       }
+			    }
+			);
+	}
+	
+	private TreeItem findActuatorItem(String location, String model) {
+		TreeItem[] roots = tree.getItems();
+		for (TreeItem ti : roots) {
+			if (ti.getText().equals(location)) {
+				TreeItem[] actuators = ti.getItems();
+				for (TreeItem a : actuators) {
+					if (a.getText().equals(model)) return a;
+				}
+			}
+		}
+		return null;
 	}
 }

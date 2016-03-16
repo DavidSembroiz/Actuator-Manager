@@ -35,6 +35,11 @@ public class Controller {
 	public ArrayList<Room> getRoomTree() {
 		return manager.getRoomTree();
 	}
+	
+	public void unsubscribe(HashMap<String, Set<String>> acts) {
+		manager.unsubscribe(acts);
+	}
+
 
 	public void subscribe(HashMap<String, Set<String>> acts) {
 		manager.subscribe(acts);
@@ -42,6 +47,10 @@ public class Controller {
 
 	public void appendOutputText(String s) {
 		gui.appendOutputText(s);
+	}
+
+	public void updateView(Actuator a) {
+		gui.updateView(a);
 	}
 
 }

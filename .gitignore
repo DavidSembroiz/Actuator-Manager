@@ -1,3 +1,5 @@
 /bin/
 /broker.properties
 /database.properties
+/broker.properties.txt
+/database.properties.txt

@@ -45,7 +45,7 @@ public class Manager {
 		
 		a.setLastAction(action);
 		a.setState(status);
-		
+		controller.updateView(a);
 		controller.appendOutputText("SOID " + soid + ": Action " + action + " done with parameter " + status);
 		
 	}
@@ -110,6 +110,18 @@ public class Manager {
 			}
 		}
 	}
+	
+	public void unsubscribe(HashMap<String, Set<String>> acts) {
+		Iterator it = acts.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry pair = (Map.Entry) it.next();
+			for (Room r : rooms) {
+				if (r.getLocation().equals(pair.getKey())) {
+					unsubscribeFromList((Set<String>) pair.getValue(), r.getActuators());
+				}
+			}
+		}
+	}
 
 	private void subscribeToList(Set<String> actsList, ArrayList<Actuator> acts) {
 		for (String a : actsList) {
@@ -117,6 +129,17 @@ public class Manager {
 				if (a.equals(ac.getModel()) && !ac.isSubscribed()) {
 					controller.appendOutputText(mqtt.subscribe(ac.getSoid(), ac.getModel(), ac.getLocation()));
 					ac.setSubscribed(true);
+				}
+			}
+		}
+	}
+	
+	private void unsubscribeFromList(Set<String> actsList, ArrayList<Actuator> acts) {
+		for (String a : actsList) {
+			for (Actuator ac : acts) {
+				if (a.equals(ac.getModel()) && ac.isSubscribed()) {
+					controller.appendOutputText(mqtt.unsubscribe(ac.getSoid(), ac.getModel(), ac.getLocation()));
+					ac.setSubscribed(false);
 				}
 			}
 		}

@@ -103,6 +103,17 @@ public class Mqtt {
 		return "Unable to subscribe to actuator " + model + " from " + location;
 	}
 	
+	public String unsubscribe(String id, String model, String location) {
+		topic = id + "/actions";
+		try {
+			client.unsubscribe(topic);
+			return "Unsubscribed from actuator " + model + " from " + location;
+		} catch (MqttException e) {
+			e.printStackTrace();
+		}
+		return "Unable to unsubscribe from actuator " + model + " from " + location;
+	}
+	
 	
 	public Set<String> getIds() {
 		return ids;
