@@ -175,7 +175,7 @@ public class MainGUI {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				MessageBox dialog = new MessageBox(shell, SWT.ICON_QUESTION | SWT.OK | SWT.CANCEL);
-				dialog.setText("Reconnect to database");
+				dialog.setText("Reconnect to MQTT Broker");
 				dialog.setMessage("All existing subscriptions will be deleted. Continue?");
 				
 				int returnCode = dialog.open();
@@ -193,7 +193,7 @@ public class MainGUI {
 			public void widgetSelected(SelectionEvent arg0) {
 				
 				MessageBox dialog = new MessageBox(shell, SWT.ICON_QUESTION | SWT.OK | SWT.CANCEL);
-				dialog.setText("Reconnect to database");
+				dialog.setText("Reconnect to Database");
 				dialog.setMessage("All existing subscriptions will be deleted. Continue?");
 				
 				int returnCode = dialog.open();
