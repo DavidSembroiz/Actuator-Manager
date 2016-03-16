@@ -134,8 +134,11 @@ public class Manager {
 		for (String a : actsList) {
 			for (Actuator ac : acts) {
 				if (a.equals(ac.getModel()) && !ac.isSubscribed()) {
-					controller.appendOutputText(mqtt.subscribe(ac.getSoid(), ac.getModel(), ac.getLocation()));
-					ac.setSubscribed(true);
+					if (mqtt.subscribe(ac.getSoid())) {
+						controller.appendOutputText("Subscribed to actuator " + ac.getModel() + " from room " + ac.getLocation());
+						ac.setSubscribed(true);
+					}
+					else controller.appendOutputText("Unable to subscribe to actuator " + ac.getModel() + " from room " + ac.getLocation());
 				}
 			}
 		}
@@ -145,8 +148,11 @@ public class Manager {
 		for (String a : actsList) {
 			for (Actuator ac : acts) {
 				if (a.equals(ac.getModel()) && ac.isSubscribed()) {
-					controller.appendOutputText(mqtt.unsubscribe(ac.getSoid(), ac.getModel(), ac.getLocation()));
-					ac.setSubscribed(false);
+					if (mqtt.unsubscribe(ac.getSoid())) {
+						controller.appendOutputText("Unsubscribed from actuator " + ac.getModel() + " from room " + ac.getLocation());
+						ac.setSubscribed(false);
+					}
+					else controller.appendOutputText("Unable to unsubscribe from actuator " + ac.getModel() + " from room " + ac.getLocation());
 				}
 			}
 		}
@@ -168,7 +174,7 @@ public class Manager {
 		while(it.hasNext()) {
 			Map.Entry pair = (Map.Entry) it.next();
 			Actuator a = (Actuator) pair.getValue();
-			if (a.isSubscribed()) mqtt.unsubscribe(a.getSoid(), a.getModel(), a.getLocation());
+			if (a.isSubscribed()) mqtt.unsubscribe(a.getSoid());
 		}
 	}
 

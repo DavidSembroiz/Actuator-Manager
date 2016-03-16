@@ -29,12 +29,10 @@ public class Mqtt {
 	private MqttCb callback;
 	private Set<String> ids;
 	private String topic;
-	private Utils uts;
 	private Properties prop;
 	private Manager manager;
 
 	public Mqtt(Manager m) {
-		uts = Utils.getInstance();
 		this.manager = m;
 		loadProperties();
 		connect();
@@ -80,10 +78,12 @@ public class Mqtt {
 			client.setCallback(callback);
 			client.connect(connOpts);
 			if (client.isConnected()) return "Connected to MQTT Broker";
+			return "Unable to connect to MQTT Broker";
 		} catch (MqttException e) {
+			if (client == null) return "Unable to connect";
 			if (client.isConnected()) return "Already connected";
 		}
-		return "Unable to connect to MQTT Broker";
+		return "MQTT Broker not reachable, check config";
 	}
 	
 	
@@ -91,26 +91,31 @@ public class Mqtt {
 		for (String id : ids) subscribe(id);
 	}*/
 	
-	public String subscribe(String id, String model, String location) {
+	public boolean subscribe(String id) {
 		topic = id + "/actions";
 		try {
-			client.subscribe(topic);
-			return "Subscribed to actuator " + model + " from " + location;
+			if (client != null && client.isConnected()) {
+				client.subscribe(topic);
+				return true;
+			}
+			return false;
 		} catch (MqttException e) {
-			e.printStackTrace();
+			return false;
 		}
-		return "Unable to subscribe to actuator " + model + " from " + location;
 	}
 	
-	public String unsubscribe(String id, String model, String location) {
+	public boolean unsubscribe(String id) {
 		topic = id + "/actions";
 		try {
-			client.unsubscribe(topic);
-			return "Unsubscribed from actuator " + model + " from " + location;
+			if (client != null && client.isConnected()) {
+				client.unsubscribe(topic);
+				return true;
+			}
+			return false;
 		} catch (MqttException e) {
 			e.printStackTrace();
 		}
-		return "Unable to unsubscribe from actuator " + model + " from " + location;
+		return false;
 	}
 	
 	
@@ -128,16 +133,20 @@ public class Mqtt {
 	 */
 	public void disconnect() {
 		try {
-			client.disconnect();
-			client.close();
+			if (client.isConnected()) {
+				client.disconnect();
+				client.close();
+			}
 		} catch (MqttException e) {
 			e.printStackTrace();
 		}
 	}
 
 	public String reconnect() {
-		disconnect();
-		while (client.isConnected());
+		if (client != null) {
+			disconnect();
+			while (client.isConnected());
+		}
 		loadProperties();
 		return connect();
 	}

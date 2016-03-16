@@ -174,7 +174,14 @@ public class MainGUI {
 		btnReconnectToBroker.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				controller.reconnectToBroker();
+				MessageBox dialog = new MessageBox(shell, SWT.ICON_QUESTION | SWT.OK | SWT.CANCEL);
+				dialog.setText("Reconnect to database");
+				dialog.setMessage("All existing subscriptions will be deleted. Continue?");
+				
+				int returnCode = dialog.open();
+				if (returnCode == SWT.OK) {
+					controller.reconnectToBroker();
+				}
 			}
 		});
 		btnReconnectToBroker.setBounds(420, 53, 140, 25);
@@ -185,9 +192,9 @@ public class MainGUI {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				
-				MessageBox dialog = new MessageBox(shell, SWT.ICON_QUESTION | SWT.OK| SWT.CANCEL);
+				MessageBox dialog = new MessageBox(shell, SWT.ICON_QUESTION | SWT.OK | SWT.CANCEL);
 				dialog.setText("Reconnect to database");
-				dialog.setMessage("All subscriptions will be deleted. Continue?");
+				dialog.setMessage("All existing subscriptions will be deleted. Continue?");
 				
 				int returnCode = dialog.open();
 				if (returnCode == SWT.OK) {
