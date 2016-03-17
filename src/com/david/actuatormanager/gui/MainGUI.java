@@ -58,6 +58,32 @@ public class MainGUI {
 		shell.dispose();
 		System.exit(0);
 	}
+	
+	/**
+	 * Create contents of the window.
+	 * @wbp.parser.entryPoint
+	 */
+	public void createContents() {
+		display = Display.getDefault();
+		
+		shell = new Shell(SWT.CLOSE | SWT.TITLE | SWT.BORDER | SWT.APPLICATION_MODAL | SWT.MIN);
+		shell.setSize(589, 523);
+		shell.setText("Actuator Manager");
+		Monitor primary = display.getPrimaryMonitor();
+	    Rectangle bounds = primary.getBounds();
+	    Rectangle rect = shell.getBounds();
+	    
+	    int x = bounds.x + (bounds.width - rect.width) / 2;
+	    int y = bounds.y + (bounds.height - rect.height) / 2;
+	    
+	    shell.setLocation(x, y);
+		
+		createMenu();
+		createTree();
+		createSubscriptionButtons();
+		createLogArea();
+		createReconnectButtons();
+	}
 
 	
 	private void createMenu() {
@@ -65,7 +91,7 @@ public class MainGUI {
 		shell.setMenuBar(menu);
 		
 		MenuItem fileMenuHeader = new MenuItem(menu, SWT.CASCADE);
-		fileMenuHeader.setText("File");
+		fileMenuHeader.setText("Config");
 		
 		Menu cascadeMenu = new Menu(fileMenuHeader);
 		fileMenuHeader.setMenu(cascadeMenu);
@@ -111,31 +137,6 @@ public class MainGUI {
 				}
 			}
 		});
-	}
-
-	/**
-	 * Create contents of the window.
-	 * @wbp.parser.entryPoint
-	 */
-	public void createContents() {
-		display = Display.getDefault();
-		shell = new Shell();
-		shell.setSize(589, 523);
-		shell.setText("Actuator Manager");
-		Monitor primary = display.getPrimaryMonitor();
-	    Rectangle bounds = primary.getBounds();
-	    Rectangle rect = shell.getBounds();
-	    
-	    int x = bounds.x + (bounds.width - rect.width) / 2;
-	    int y = bounds.y + (bounds.height - rect.height) / 2;
-	    
-	    shell.setLocation(x, y);
-		
-		createMenu();
-		createTree();
-		createSubscriptionButtons();
-		createLogArea();
-		createReconnectButtons();
 	}
 	
 	private void checkItems(TreeItem item, boolean checked) {

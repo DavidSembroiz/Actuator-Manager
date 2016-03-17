@@ -180,7 +180,7 @@ public class Manager {
 
 
 	public String reconnectToBroker() {
-		return mqtt.reconnect();
+		return mqtt.reconnect();	
 	}
 
 	public void cleanSubscriptions() {
